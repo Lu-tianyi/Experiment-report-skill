@@ -1,8 +1,8 @@
 from fpdf import FPDF
 import os
 
-# Output path
-output_dir = r"C:\Users\Cgy123456\Desktop\学长的焚决\大一下\大物实验\大物实验报告"
+# Dynamic output path - save to user's Desktop/report/save/
+output_dir = os.path.join(os.path.expanduser("~"), "Desktop", "report", "save")
 os.makedirs(output_dir, exist_ok=True)
 output_pdf = os.path.join(output_dir, "实验5.21_金属逸出功实验.pdf")
 
@@ -73,9 +73,13 @@ class ExperimentReport(FPDF):
 # Create PDF
 pdf = ExperimentReport()
 
-# Add fonts
-pdf.add_font('SimSun', '', r'C:\Windows\Fonts\simsun.ttc', uni=True)
-pdf.add_font('SimHei', '', r'C:\Windows\Fonts\simhei.ttf', uni=True)
+# Add fonts - use system font paths dynamically
+font_dir = os.path.join(os.environ.get("WINDIR", "C:\\Windows"), "Fonts")
+simsun_path = os.path.join(font_dir, "simsun.ttc")
+simhei_path = os.path.join(font_dir, "simhei.ttf")
+
+pdf.add_font('SimSun', '', simsun_path, uni=True)
+pdf.add_font('SimHei', '', simhei_path, uni=True)
 
 # Title page
 pdf.add_page()
@@ -120,25 +124,25 @@ pdf.body_text(
     '金属中的电子在热运动过程中，如果其动能足以克服表面势垒，就能逸出金属表面形成热电子发射。'
     '根据 Richardson-Dushman 方程，热电子发射电流密度为：'
 )
-pdf.equation('J = AT\u00B2 exp(-eW/kT)')
+pdf.equation('J = AT² exp(-eW/kT)')
 pdf.body_text(
     '其中 J 为发射电流密度，A 为 Richardson 常数，T 为绝对温度，W 为电子逸出功，'
     'e 为元电荷，k 为 Boltzmann 常数。'
 )
 pdf.body_text('对于实际阴极，发射电流为：')
-pdf.equation('I = AST\u00B2 exp(-eW/kT)')
+pdf.equation('I = AST² exp(-eW/kT)')
 pdf.body_text('其中 S 为阴极发射面积。取对数得：')
-pdf.equation('lg(I/T\u00B2) = lg(AS) - (eW/(k\u00B7ln10)) \u00D7 (1/T)')
-pdf.body_text('以 lg(I/T\u00B2) 为纵坐标，1/T 为横坐标作图，可得一条直线，其斜率为：')
-pdf.equation('m = -eW/(k\u00B7ln10)')
+pdf.equation('lg(I/T²) = lg(AS) - (eW/(k·ln10)) × (1/T)')
+pdf.body_text('以 lg(I/T²) 为纵坐标，1/T 为横坐标作图，可得一条直线，其斜率为：')
+pdf.equation('m = -eW/(k·ln10)')
 pdf.body_text('由此可求得逸出功：')
-pdf.equation('W = -m \u00D7 (k/e) \u00D7 ln10')
+pdf.equation('W = -m × (k/e) × ln10')
 pdf.body_text(
     '由于实际测量中存在接触电势差和空间电荷效应，需要在不同阳极电压 Ua 下测量阳极电流 Ia，'
     '然后外推到 Ua = 0 得到零场发射电流 I。'
 )
-pdf.body_text('根据 Schottky 效应，lg Ia 与 \u221AUa 成线性关系：')
-pdf.equation('lg Ia = a\u221AUa + lg I')
+pdf.body_text('根据 Schottky 效应，lg Ia 与 √Ua 成线性关系：')
+pdf.equation('lg Ia = a√Ua + lg I')
 
 # Section 3
 pdf.section_title('三、实验仪器')
@@ -149,13 +153,13 @@ pdf.section_title('四、实验内容与数据记录')
 pdf.sub_section_title('1. 测量不同灯丝电流下的阳极电流')
 pdf.body_text(
     '在灯丝电流 If = 0.600~0.700 A 范围内，以 0.025 A 为间隔调节灯丝电流，'
-    '对每个 If 值，测量不同阳极电压 Ua 下的阳极电流 Ia（单位：\u03BCA）。'
+    '对每个 If 值，测量不同阳极电压 Ua 下的阳极电流 Ia（单位：μA）。'
 )
 pdf.body_text('温度计算公式：T = 900 + 1430 If（单位：K）')
 
 pdf.sub_section_title('2. 原始数据记录')
 pdf.set_font('SimSun', '', 10)
-pdf.cell(0, 8, '附录表5.21.1 不同 Ua 和 If 下的 Ia 数据（单位：\u03BCA）', 0, 1, 'C')
+pdf.cell(0, 8, '附录表5.21.1 不同 Ua 和 If 下的 Ia 数据（单位：μA）', 0, 1, 'C')
 pdf.ln(2)
 
 # Raw data table
@@ -181,12 +185,12 @@ headers = ['If/A', '0.600', '0.625', '0.650', '0.675', '0.700']
 data = [['T/K', '1758.0', '1793.8', '1829.5', '1865.2', '1901.0']]
 pdf.add_table(headers, data, [35, 31, 31, 31, 31, 31])
 
-pdf.sub_section_title('2. lg Ia - \u221AUa 线性拟合')
+pdf.sub_section_title('2. lg Ia - √Ua 线性拟合')
 pdf.body_text(
-    '对每个温度下（即每个 If 值）的 lg Ia 与 \u221AUa 进行线性拟合，得到截距 lg I（零场电流对数）。'
+    '对每个温度下（即每个 If 值）的 lg Ia 与 √Ua 进行线性拟合，得到截距 lg I（零场电流对数）。'
 )
 pdf.set_font('SimSun', '', 10)
-pdf.cell(0, 8, 'lg Ia - \u221AUa 线性拟合结果', 0, 1, 'C')
+pdf.cell(0, 8, 'lg Ia - √Ua 线性拟合结果', 0, 1, 'C')
 pdf.ln(2)
 
 headers = ['If/A', 'T/K', '斜率', 'lg I', '相关系数 r']
@@ -201,13 +205,13 @@ pdf.add_table(headers, data, [30, 30, 30, 30, 30])
 
 pdf.sub_section_title('3. Richardson 直线法求逸出功')
 pdf.body_text(
-    '根据 Richardson-Dushman 方程，以 lg(I/T\u00B2) 为纵坐标，1/T 为横坐标作直线拟合。'
+    '根据 Richardson-Dushman 方程，以 lg(I/T²) 为纵坐标，1/T 为横坐标作直线拟合。'
 )
 pdf.set_font('SimSun', '', 10)
 pdf.cell(0, 8, 'Richardson 直线法数据', 0, 1, 'C')
 pdf.ln(2)
 
-headers = ['T/K', 'lg I', 'lg(I/T\u00B2)', '10\u2074/T K\u207B\u00B9']
+headers = ['T/K', 'lg I', 'lg(I/T²)', '10⁴/T K⁻¹']
 data = [
     ['1758.0', '1.7093', '-4.7808', '5.688'],
     ['1793.8', '1.9798', '-4.5277', '5.575'],
@@ -218,12 +222,12 @@ data = [
 pdf.add_table(headers, data, [40, 40, 40, 40])
 
 pdf.body_text('线性拟合结果：')
-pdf.equation('lg(I/T\u00B2) = -20962.8553 \u00D7 (1/T) + 7.1561')
+pdf.equation('lg(I/T²) = -20962.8553 × (1/T) + 7.1561')
 pdf.body_text('相关系数 r = -0.9992')
 
 pdf.sub_section_title('4. 逸出功计算')
 pdf.body_text('斜率 m = -20962.8553')
-pdf.equation('W = -m \u00D7 (k/e) \u00D7 ln10 = 20962.8553 \u00D7 8.6173\u00D710\u207B\u2075 \u00D7 2.3026 = 4.1595 eV')
+pdf.equation('W = -m × (k/e) × ln10 = 20962.8553 × 8.6173×10⁻⁵ × 2.3026 = 4.1595 eV')
 
 # Section 6
 pdf.section_title('六、实验结果')

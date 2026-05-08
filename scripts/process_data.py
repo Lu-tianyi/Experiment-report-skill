@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import stats
 import json
+import os
 
 # Correct interpretation based on analysis:
 # Rows correspond to different If values: [0.600, 0.625, 0.650, 0.675, 0.700] A
@@ -86,7 +87,10 @@ print()
 AS = 10 ** intercept_rich
 print(f"A*S = {AS:.4e} A/K^2")
 
-# Save results
+# Save results - use dynamic path relative to script location
+script_dir = os.path.dirname(os.path.abspath(__file__))
+results_path = os.path.join(script_dir, "results.json")
+
 results = {
     "If_values": If_values.tolist(),
     "Ua_values": Ua_values.tolist(),
@@ -107,7 +111,7 @@ results = {
     "r_values": r_values,
 }
 
-with open("C:/Users/Cgy123456/.agents/skills/大物实验报告skill/scripts/results.json", "w", encoding="utf-8") as f:
+with open(results_path, "w", encoding="utf-8") as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 
-print("\nResults saved to results.json")
+print(f"\nResults saved to {results_path}")
